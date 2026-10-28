@@ -1,74 +1,69 @@
 ```mermaid
 flowchart TD
-    %% Styling and Classes
-    classDef admin fill:#ECFDF5,stroke:#10B981,stroke-width:2px,color:#065F46;
-    classDef ai fill:#F5F3FF,stroke:#8B5CF6,stroke-width:2px,color:#5B21B6;
-    classDef rules fill:#ECFDF5,stroke:#059669,stroke-width:2px,color:#064E3B;
+    %% Styling Definitions
+    classDef prototype fill:#ECFDF5,stroke:#059669,stroke-width:2px,color:#064E3B;
+    classDef proposedAi fill:#F5F3FF,stroke:#8B5CF6,stroke-width:2px,color:#5B21B6;
+    classDef proposedArch fill:#F1F5F9,stroke:#64748B,stroke-width:2px,color:#1E293B;
     classDef human fill:#FEF3C7,stroke:#F59E0B,stroke-width:2px,color:#92400E;
     classDef flag fill:#FEF2F2,stroke:#EF4444,stroke-width:2px,color:#991B1B;
 
-    %% Step 1: Admin Setup
-    Step1["1. Category & Criteria Setup<br/>(Admin configures weights & mandatory gates; saves Version v1.0)"]:::admin
+    %% Step 1: Configuration
+    Step1["1. Category & Criteria Configuration<br/><b>[Prototype: Code Config | Proposed: Admin DB & UI]</b><br/>Weights: Exp 30%, Price 25%, Timeline 15%, Warranty 15%, Team 15%"]:::proposedArch
     
     %% Step 2: Upload
-    Step2["2. Proposal Upload & Ingestion<br/>(Reviewer uploads contractor PDF & selects category)"]:::rules
+    Step2["2. Proposal Document Ingestion<br/><b>[Proposed Production Architecture]</b><br/>Contractor uploads PDF (Proposals A to E)"]:::proposedArch
     
     %% Step 3: AI Extraction
-    Step3["3. AI Structured Extraction<br/>(LLM parses untrusted text to JSON facts & citations)"]:::ai
+    Step3["3. AI Structured Fact Extraction<br/><b>[Proposed Production Architecture]</b><br/>LLM extracts facts & verbatim quotes into JSON schema"]:::proposedAi
     
-    %% Injection Check Branch
-    SecCheck{"Prompt Injection<br/>Detected in text?"}:::ai
-    SecFlag["Flag Security Alert<br/>(Ignore internal commands e.g. Proposal C; Log event)"]:::flag
-    
-    %% Step 4: Mandatory Gates
-    Step4{"4. Mandatory Compliance Gate<br/>• Ontario Licence held by bidder?<br/>• WSIB & $5M Insurance?<br/>• Budget <= $260k?"}:::rules
-    Ineligible["Status: INELIGIBLE<br/>(Fails mandatory requirement)"]:::flag
-    FlaggedMandatory["Status: FLAGGED<br/>(Ambiguous / Subcontractor licence unconfirmed e.g. Proposal B)"]:::flag
-    
-    %% Step 5: Weighted Scoring
-    Step5{"5. Complete Scoring Data Available?<br/>• Timeline committed within 16 weeks?<br/>• Complete proposal parameters?"}:::rules
-    FlaggedTimeline["Status: FLAGGED<br/>(Timeline TBD e.g. Proposal D; refuse to guess)"]:::flag
-    CalcScores["Compute Weighted Score (0-100)<br/>• Experience (30%) • Price (25%)<br/>• Timeline (15%) • Warranty (15%)<br/>• Team & Approach (15%)"]:::rules
-    
-    %% Step 6: Output
-    Step6["6. Generate Ranked Triage<br/>(ranking.json: Ranked, Flagged, Scores & Explanations)"]:::rules
-    
-    %% Step 7: Human Review
-    Step7["7. Human Review & Verification<br/>(Reviewer inspects citations, investigates flags, logs overrides)"]:::human
-    
-    %% Step 8: Final Decision & Audit
-    Step8["8. Final Contract Award<br/>(Authorized procurement decision-maker awards contract)"]:::human
-    Step9["9. Immutable Audit Log<br/>(Snapshot of criteria version, raw text, AI output, overrides, decision)"]:::rules
+    %% Untrusted boundary & security check
+    SecCheck{"Proposal Text: Untrusted Input<br/><b>[Proposed Prompt Guard]</b><br/>Embedded commands ignored<br/>(e.g., Proposal C Appendix C)"}:::proposedAi
+    SecFlag["Log Security Anomaly<br/><b>[Proposed Production]</b><br/>Flag attempt for human audit"]:::flag
 
-    %% Re-evaluation Loop
-    CriteriaChange{"Criteria Changed<br/>by Admin?"}:::admin
-    NewVersion["Create Criteria Version v2.0<br/>(Preserve v1.0 audit log; re-run scoring safely)"]:::admin
+    %% Step 4: Mandatory Rule Gates (Implemented)
+    Step4{"4. Mandatory Compliance Gates<br/><b>[IMPLEMENTED IN PROTOTYPE]</b><br/>• Ontario electrical licence held by bidder?<br/>• WSIB clearance & $5M insurance confirmed?<br/>• Total price <= $260k budget ceiling?"}:::prototype
 
-    %% Connections
+    FlagB["Flag Proposal B<br/><b>[IMPLEMENTED IN PROTOTYPE]</b><br/>Status: FLAGGED (score: null, rank: null)<br/>Bidder's own licence not confirmed;<br/>subcontractor does not establish compliance"]:::flag
+
+    %% Step 5: Evidence & Fact Validation (Implemented)
+    Step5{"5. Complete Scoring Data Checks<br/><b>[IMPLEMENTED IN PROTOTYPE]</b><br/>• Experience strictly within 5-year window?<br/>• Committed completion timeline <= 16 weeks?"}:::prototype
+
+    FlagC["Flag Proposal C<br/><b>[IMPLEMENTED IN PROTOTYPE]</b><br/>Status: FLAGGED (score: null, rank: null)<br/>Nine installs 'since 2020' does not prove<br/>count within required 5-year period (2021-2026)"]:::flag
+
+    FlagD["Flag Proposal D<br/><b>[IMPLEMENTED IN PROTOTYPE]</b><br/>Status: FLAGGED (score: null, rank: null)<br/>Timeline deferred to site assessment;<br/>compliance with 16-week deadline unverified"]:::flag
+
+    %% Step 6: Deterministic Scoring (Implemented)
+    Step6["6. Deterministic Weighted Scoring<br/><b>[IMPLEMENTED IN PROTOTYPE]</b><br/>Computes total score (0-100) using published formula:<br/>Score = (Exp*0.30) + (Price*0.25) + (Timeline*0.15)<br/>+ (Warranty*0.15) + (Team*0.15)"]:::prototype
+
+    %% Step 7: Output (Implemented)
+    Step7["7. Ranked Triage Output (ranking.json)<br/><b>[IMPLEMENTED IN PROTOTYPE]</b><br/>• Proposal A: Rank 1, Score 97 (Ranked)<br/>• Proposal E: Rank 2, Score 90 (Ranked)<br/>• Proposals B, C, D: Status Flagged (Rank/Score: null)<br/><i>(Provides total scores and clear reasons)</i>"]:::prototype
+
+    %% Step 8: Human Review (Proposed)
+    Step8["8. Human Review & Verification<br/><b>[Human Authority / Proposed Workflow]</b><br/>Reviewer investigates flags (B, C, D), verifies source text,<br/>and logs any manual overrides with recorded justification"]:::human
+
+    %% Step 9: Final Award & Audit (Proposed)
+    Step9["9. Procurement Award & Audit Log<br/><b>[Proposed Production Architecture]</b><br/>Authorized human officer awards contract;<br/>Database stores immutable versioned audit history"]:::human
+
+    %% Flow connections
     Step1 --> Step2
     Step2 --> Step3
     Step3 --> SecCheck
-    SecCheck -- Yes --> SecFlag
-    SecCheck -- No --> Step4
-    SecFlag --> Step4
-    
-    Step4 -- Fails --> Ineligible
-    Step4 -- Unclear / Missing --> FlaggedMandatory
-    Step4 -- Pass --> Step5
-    
-    Step5 -- Missing Timeline / Facts --> FlaggedTimeline
-    Step5 -- All Facts Present --> CalcScores
-    
-    CalcScores --> Step6
-    FlaggedMandatory --> Step6
-    FlaggedTimeline --> Step6
-    Ineligible --> Step6
-    
+    SecCheck -- Prompt Injection Detected --> SecFlag
+    SecCheck -- Normal Extraction --> Step4
+    SecFlag -. Logged .-> Step4
+
+    Step4 -- Licence Unconfirmed --> FlagB
+    Step4 -- Mandatory Checks Passed --> Step5
+
+    Step5 -- Experience Dates Ambiguous --> FlagC
+    Step5 -- Timeline Deferred --> FlagD
+    Step5 -- All Facts Verified --> Step6
+
     Step6 --> Step7
+    FlagB --> Step7
+    FlagC --> Step7
+    FlagD --> Step7
+
     Step7 --> Step8
     Step8 --> Step9
-    
-    Step9 -. Criteria Updated .-> CriteriaChange
-    CriteriaChange --> NewVersion
-    NewVersion --> Step5
 ```

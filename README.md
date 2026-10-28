@@ -3,95 +3,116 @@
 **Candidate:** Sheryar Khan  
 **Position:** Associate Software Developer  
 **Company:** Matacs Technologies Inc.  
-**Reference:** MATACS-TH-2026-02  
+**Reference:** MATACS-TH-2026-02
 
 ---
 
 ## 1. Problem Overview
 
-A facilities management team receives lengthy, unstructured contractor proposals for commercial facilities projects. For this assessment, the scenario is a **150 kW commercial rooftop solar installation in Windsor, Ontario** with a budget ceiling of **$260,000 CAD** and a mandatory completion window of **16 weeks**.
+A facilities management team receives lengthy contractor proposals for commercial projects. This assessment focuses on a 150 kW commercial rooftop solar installation in Windsor, Ontario, with a maximum budget of CAD $260,000 and a required completion time of 16 weeks.
 
-Reviewing these multi-page PDF proposals manually is slow, error-prone, and inconsistent. Reviewers can easily miss unstated electrical safety licences or subtle legal omissions. The team requires an **AI-assisted triage system** that automates initial compliance screening, calculates objective scores based on configurable criteria, flags missing or suspicious information, and produces a transparent, evidence-backed ranked shortlist for human decision-makers.
+Reviewing multiple proposals manually can be slow and inconsistent. Important details, such as electrical contractor licensing, insurance, project experience, and completion schedules, may be missed.
 
----
+The goal is to design an AI-assisted proposal triage system that helps reviewers identify missing information, check mandatory requirements, calculate weighted scores, and compare eligible proposals. The system supports human decision-making; it does not make the final contract award.
 
 ## 2. Proposed Solution Overview
 
-Our solution is a lightweight, human-centric triage pipeline designed around three core principles:
-1. **AI for Language, Code for Math:** We use AI exclusively to extract unstructured proposal text into validated JSON facts with verbatim evidence quotes. All mathematical scoring, pass/fail gates, and sorting are executed by deterministic code.
-2. **Defensive by Design:** Untrusted document text is isolated inside `<untrusted_proposal_document>` delimiters, neutralizing prompt injection attempts (such as the malicious instruction found in Proposal C's Appendix C).
-3. **Transparent & Auditable:** Missing or ambiguous facts are never assumed or invented. Proposals with unconfirmed requirements (such as Proposal B's unverified subcontractor licence and Proposal D's uncommitted schedule) are categorized as `flagged` with null scores, ensuring full visibility for human reviewers.
+The proposed solution separates AI-assisted document understanding from rule-based evaluation.
 
----
+1. **AI for language, code for scoring:** AI can extract facts from unstructured proposal documents into structured data. Application code applies mandatory checks, calculates scores, and ranks eligible proposals.
+2. **Defensive design:** Proposal content is treated as untrusted data. Instructions embedded inside a proposal, such as the manipulation attempt in Proposal C's appendix, must not control the evaluation.
+3. **Transparent decisions:** Missing or ambiguous information should not be guessed. Proposals with unresolved eligibility or evidence issues are flagged for human review.
+
+**Current implementation:** The Python prototype demonstrates rule-based checks, scoring, ranking, and proposal flags using sample data. It does not perform live AI extraction, read uploaded PDFs, or implement a complete database-backed audit system. The prompts and write-up describe parts of the proposed broader system.
 
 ## 3. Division of Responsibilities: AI vs. Deterministic Code
 
-| Function | Handled By | Rationale |
-| :--- | :--- | :--- |
-| **Criteria & Weights Setup** | Plain Code & DB | Admin criteria must be strictly structured, versioned, and stored in a database. |
-| **Proposal Fact Extraction** | **AI (LLM)** | Unstructured PDFs have varied layouts. LLMs excel at parsing free-text into JSON. |
-| **Evidence Quote Linking** | **AI (LLM)** | AI pinpoints verbatim quotes from the proposal text to support each extracted fact. |
-| **Prompt Injection Defense** | Plain Code & AI Guard | System isolates document text inside untrusted tags and screens for unauthorized instructions. |
-| **Mandatory Pass/Fail Gates** | Plain Code | Licensing and insurance rules require strict boolean logic with zero hallucinations. |
-| **Weighted Scoring Calculations** | Plain Code | Mathematical formulas must be 100% exact, auditable, and repeatable. |
-| **Ranking & Sorting** | Plain Code | Deterministic sorting algorithms order eligible bids by score. |
-| **Executive Explanations** | **AI (LLM)** | Generates plain-language briefing notes synthesized strictly from verified facts. |
-| **Verification & Final Award** | **Human Reviewer** | Facilities managers investigate flags, approve overrides, and make the legal award. |
-| **Immutable Audit Logging** | Plain Code & DB | Stores criteria versions, raw inputs, scores, and reviewer notes in an unalterable log. |
+| Function | Proposed responsibility | Rationale |
+|---|---|---|
+| Criteria and weights | Application code and database | Criteria should be structured, validated, and versioned. |
+| Proposal fact extraction | AI (large language model, or LLM) | AI can help interpret varied wording and document formats. |
+| Evidence quotes | AI proposes quotes; application and human checks verify them | Evidence helps reviewers check extracted facts against the original proposal. |
+| Prompt-injection safeguards | Prompt design and application validation | Proposal text must be treated as untrusted data, not as instructions. |
+| Mandatory checks | Application code using verified facts | The same eligibility rules should be applied consistently. |
+| Weighted scoring | Application code | Fixed formulas make calculations repeatable and easier to audit. |
+| Ranking and sorting | Application code | Eligible proposals can be ordered using their calculated scores. |
+| Reviewer explanations | Templates or AI-assisted summaries | Explanations should reflect verified facts, scores, and flags. |
+| Verification and final award | Human reviewer and authorized procurement officer | Humans resolve uncertainty and make the final award decision. |
+| Audit logging | Database and application code in a production system | A production implementation should preserve evaluation history and reviewer actions. |
 
----
+Deterministic code improves consistency, but it cannot guarantee correct results if the input data, scoring rules, or implementation contain errors. Human verification remains important.
 
-## 4. Deliverables & File Guide
+## 4. Deliverables and File Guide
 
-All assessment deliverables are organized within this repository:
+The following files are intended to be included in this repository. Confirm that each file exists at the listed path before submission.
 
-| Deliverable | File Link | Description |
-| :--- | :--- | :--- |
-| **Design Write-Up** | [WRITEUP.md](WRITEUP.md) | Answers to the 5 core questions from the brief (strictly under 1,000 words). |
-| **Workflow Diagram** | [diagram/workflow.png](diagram/workflow.png) | High-resolution visual process flow from upload to human decision. |
-| **Mermaid Diagram Source** | [diagram/workflow.mmd](diagram/workflow.mmd) | Editable Mermaid diagram source code. |
-| **AI Prompts Specification** | [PROMPTS.md](PROMPTS.md) | Production extraction and explanation prompts with anti-injection defenses. |
-| **Expected Ranking JSON** | [ranking.json](ranking.json) | Validated JSON output ranking Proposals A–E with statuses, scores, and reasons. |
-| **Deterministic Prototype** | [prototype/triage.py](prototype/triage.py) | Runnable Python script validating math, mandatory rules, and edge cases. |
-| **Learning & Interview Guide** | [LEARNING_GUIDE.md](LEARNING_GUIDE.md) | Beginner-friendly study guide explaining all concepts and 10 interview Q&As. |
+| Deliverable | File | Description |
+|---|---|---|
+| Technical write-up | [WRITEUP.md](WRITEUP.md) | Answers the five assessment questions within the required word limit. |
+| Workflow diagram | [diagram/workflow.png](diagram/workflow.png) | Visual overview of the proposed workflow. |
+| Diagram source | [diagram/workflow.mmd](diagram/workflow.mmd) | Editable Mermaid diagram source. |
+| AI prompt specification | [PROMPTS.md](PROMPTS.md) | Prompts for structured extraction and reviewer explanations, including safeguards against prompt injection. |
+| Ranking results | [ranking.json](ranking.json) | Sample results for proposals A-E, including ranks, scores, flags, and reasons. |
+| Python prototype | [prototype/triage.py](prototype/triage.py) | Runnable demonstration of rule-based checks, scoring, ranking, and flags. |
 
----
+## 5. Sample Proposal Evaluation Results
 
-## 5. Summary of Sample Proposal Evaluation Results
+The current prototype produces the following results:
 
-| Proposal | Bidder Name | Status | Rank | Score | Summary Rationale |
-| :---: | :--- | :---: | :---: | :---: | :--- |
-| **A** | Northshore Solar Ltd. | `ranked` | **1** | **97** | Top commercial experience (14 installs), compliant $238k price, 12-wk timeline, complete safety and 12-mo monitoring plan. |
-| **E** | SunGrid Contractors Inc. | `ranked` | **2** | **90** | Outstanding 12-yr workmanship warranty, comprehensive safety and 24-mo monitoring plan, competitive $242.5k price. |
-| **C** | Lakeview Renewables Corp. | `ranked` | **3** | **81** | Compliant with solid track record and 10-yr warranty, but higher price ($244k), longer schedule (14 wks), and no monitoring plan. Prompt injection safely ignored. |
-| **B** | BrightPath Energy Inc. | `flagged` | `null` | `null` | Bidder does not hold the mandatory Ontario electrical contractor licence; proposes an unconfirmed subcontractor post-award. |
-| **D** | Essex Green Power Inc. | `flagged` | `null` | `null` | Completion timeline is uncommitted (deferred to site assessment); cannot verify compliance with 16-week requirement. |
+| Proposal | Bidder | Status | Rank | Score | Reason |
+|---|---|---|---:|---:|---|
+| A | Northshore Solar Ltd. | `ranked` | 1 | 97 | Reports 14 qualifying installations, a $238,000 price, a 12-week timeline, a named lead, a six-person crew, a safety plan, and 12-month monitoring. |
+| E | SunGrid Contractors Inc. | `ranked` | 2 | 90 | Offers a 12-year workmanship warranty, 24-month monitoring, a $242,500 price, a 13-week timeline, and eight qualifying installations. |
+| B | BrightPath Energy Inc. | `flagged` | `null` | `null` | The proposal does not confirm that the bidder itself holds the required Ontario electrical contractor licence. |
+| C | Lakeview Renewables Corp. | `flagged` | `null` | `null` | The proposal reports nine installations since 2020, but does not establish how many meet the required five-year experience period. |
+| D | Essex Green Power Inc. | `flagged` | `null` | `null` | The completion timeline is not committed, so compliance with the 16-week requirement cannot be confirmed. |
 
----
+A flagged proposal is not automatically rejected. It requires clarification or human review before its eligibility and score can be determined.
 
-## 6. Candidate to Complete Before Submission
+The scores shown here are the current prototype's outputs. They should not be treated as proof of a fully validated procurement scoring model.
 
-> **Notice:** The sections below reflect the candidate's actual review, personal verification, and AI-use disclosure.
+## 6. Candidate Information and AI-Use Disclosure
+
+**Complete this section honestly before submission. Replace the examples below where needed.**
 
 ### A. Time Actually Spent
-- **Total Time:** ~75 minutes (including brief analysis, workflow design, scoring policy formulation, prompt engineering, diagram generation, prototype script validation, and interview preparation review).
+
+**Total time:** About 75 minutes
+
+Include only work you actually completed, such as reviewing the requirements, designing the workflow, testing the Python prototype, and reviewing the documentation.
 
 ### B. AI Tools Disclosure
-> *"I used AI as an architectural sounding board to draft initial prompt structures and brainstorm edge-case risk scenarios. All architectural decisions, scoring boundaries, prompt injection safeguards, and written explanations were personally reviewed, validated, and refined by me to ensure full compliance with the assessment brief."*
+
+Describe which AI tools you used and what you used them for. For example, if accurate:
+
+> I used ChatGPT to help review the proposed design, identify inconsistencies between the Python prototype and its documentation, explain technical concepts, and refine written explanations. I reviewed the suggested changes and tested the Python prototype locally. The current prototype uses sample data and rule-based evaluation; it does not perform live AI extraction of contractor PDFs.
+
+Edit this disclosure so that it accurately describes your own work and tool usage.
 
 ### C. Example of Reviewing and Correcting AI Output
-> *"During the design process, the AI initially attempted to award Proposal B a high score due to its low price ($189,500), while treating the subcontractor licence as a minor detail that could be confirmed later. I caught this and corrected it: the assessment brief explicitly states that the licence must be 'held by the bidder and stated in the proposal'. Allowing an unconfirmed subcontractor to bypass mandatory compliance would violate legal and procurement safety standards. I updated the policy and code so that Proposal B is strictly marked as `flagged` with a null rank and score until a human reviewer clarifies the subcontractor's credentials."*
 
----
+Use a real example from your work. One possible example, if it accurately reflects what happened, is:
 
-## 7. How to Run the Prototype (Extra Credit)
+> During review, I identified that Proposal C's nine installations since 2020 did not establish how many installations fell within the required five-year period. I updated the result to flag Proposal C rather than assign an experience score based on an unsupported assumption. This makes the decision more transparent and gives a human reviewer a clear question to resolve.
 
-To run the deterministic triage script and reproduce `ranking.json`:
+Do not claim that you independently identified or corrected something unless that accurately describes your contribution. You should be able to explain your reasoning and the changes you made.
 
-```bash
-# Using standard Python 3
-python prototype/triage.py
+## 7. How to Run the Prototype
 
-# On Windows
+Run the script from the repository's root directory using Python 3.
+
+**Windows PowerShell:**
+
+```powershell
 py prototype/triage.py
 ```
+
+Alternatively:
+
+```powershell
+python prototype/triage.py
+```
+
+The script prints the sample proposal results as JSON. The current expected outcome is Proposal A ranked first with a score of 97, Proposal E ranked second with a score of 90, and Proposals B, C, and D flagged with null scores and ranks.
+
+This is a demonstration using sample proposal data, not a complete production application.
