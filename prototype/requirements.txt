@@ -1,0 +1,4 @@
+# Core Python standard libraries are sufficient for the prototype.
+# Optional dependencies if connecting live to an LLM provider:
+# python-dotenv>=1.0.0
+# openai>=1.0.0
